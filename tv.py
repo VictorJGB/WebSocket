@@ -7,7 +7,5 @@ tcp.connect(dest)
 print("Iniciando conexão com servidor... \n")
 
 while True:
-    msg = input("Digite ENTER para chamar uma nova senha").encode('utf-8')
-    tcp.send (msg)
     senha = tcp.recv(1024).decode('utf-8')
-    print("Guichê 01 - Senha ",senha)
+    print("Última senha chamada: ",senha)
