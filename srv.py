@@ -10,8 +10,9 @@ count_N_chamadas = 0    # Contador de senhas normais chamadas(Requisitos da aval
 N_list = []             # Array contendo senhas normais a serem chamadas
 P_list = []             # Array contendo senhas prioritárias a serem chamadas
 
+# Criando função da conexão com o cliente
 def ClientConnection(con, cliente):
-    print (f'Conectado por', cliente)
+    print (f'\nConectado por', cliente)
     
     while True:
         # Especificando variáveis globais da função
@@ -19,35 +20,48 @@ def ClientConnection(con, cliente):
         global N_list,P_list
         
         msg = con.recv(1024).decode('utf-8') # Mensagem recebida do cliente
-        if(msg == 'N'): # If para chamada de senha normal
+        
+        if(msg == 'N'): # IF para chamada de senha normal
             msg = msg+str(count_normal)
             N_list.append(msg)
+            print ('\nSenha: ', msg, ' retirada!')
             count_normal+=1
-            print ('Senha: ', msg, ' retirada!')
             
-        elif(msg == 'P'): # If para chamada de senha normal
+        elif(msg == 'P'): # IF para chamada de senha prioritária
             msg = msg+str(count_priority)
             P_list.append(msg)
+            print ('\nSenha: ', msg, ' retirada!')
             count_priority+=1
-            print ('Senha: ', msg, ' retirada!')
             
-        elif(msg == ''): # If para requisição de senha do TA
-            if(count_N_chamadas < 2): # Verificação de requisito da avaliação
-                res = 'N'+str(count_normal).encode('utf-8')
-                con.send(res)
-                count_N_chamadas+=1
+        elif(msg == 'ENTER'): # IF para requisição de senha do TA
+            if(count_N_chamadas < 2):
+                if len(N_list) > 0:
+                    res_msg = "Guichê 01 - senha "+str(N_list[0])
+                    res = (res_msg).encode('utf-8')
+                    con.send(res)
+                    N_list.pop(0)
+                    count_N_chamadas+=1
+                else:
+                    res = ("Nenhuma senha normal para chamar").encode('utf-8')
+                    con.send(res)
             else:
-                res = 'P'+str(count_priority).encode('utf-8')
-                con.send(res)
-                count_N_chamadas=0
+                if len(P_list) > 0:
+                    res_msg = "Guichê 01 - senha "+str(P_list[0])
+                    res = (res_msg).encode('utf-8')
+                    con.send(res)
+                    P_list.pop(0)
+                    count_N_chamadas=0
+                else:
+                    res = ("Nenhuma senha prioritária para chamar").encode('utf-8')
+                    con.send(res)
                     
         if not msg: break
         
         
-    print ('Finalizando conexao do cliente', cliente)
+    print ('\nFinalizando conexao do cliente', cliente)
     con.close()
     
-
+# Configurando variáveis de conexão TCP
 tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 orig = (HOST, PORT)
 tcp.bind(orig)
@@ -55,6 +69,7 @@ tcp.listen()
 
 print("Iniciando servidor principal!")
 while True:
+    # Utilizando função na criação da thread
     con, cliente = tcp.accept()
     _thread.start_new_thread(ClientConnection, (con, cliente))
    
