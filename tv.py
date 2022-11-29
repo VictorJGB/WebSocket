@@ -13,4 +13,4 @@ while True:
     msg, cliente = udp.recvfrom(1024)
     msg = msg.decode('utf-8')
     
-    print ("Última senha chamada: ", msg)
+    print (msg)

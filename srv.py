@@ -1,5 +1,6 @@
 import _thread
 import socket
+from datetime import datetime
 
 HOST = '127.0.0.1'    # Endereco IP do Servidor
 PORT = 5000           # Port do servidor
@@ -7,6 +8,7 @@ PORT = 5000           # Port do servidor
 HOST_TV = '127.0.0.2'     # Endereco IP do Server TV
 PORT_TV = 5001            # Porta do Server TV
 
+timestamp = datetime.now()
 count_normal = 1        # Contador para o número da senha normal
 count_priority = 1      # Contador para o número da senha prioritária
 count_N_chamadas = 0    # Contador de senhas normais chamadas(Requisitos da avaliação)
@@ -27,24 +29,28 @@ def ClientConnection(con, cliente, udp, dest):
         if(msg == 'N'): # IF para chamada de senha normal
             msg = msg+str(count_normal)
             N_list.append(msg)
-            print ('Senha: ', msg, ' retirada!')
+            print(timestamp, "- Senha",msg,"recebida\n")
             count_normal+=1
             
         elif(msg == 'P'): # IF para chamada de senha prioritária
             msg = msg+str(count_priority)
             P_list.append(msg)
-            print ('Senha: ', msg, ' retirada!')
+            print(timestamp, "- Senha",msg,"recebida\n")
             count_priority+=1
             
         elif(msg == 'ENTER'): # IF para requisição de senha do TA
             if(count_N_chamadas < 2):
                 if len(N_list) > 0:
-                    msg_tcp = "Guichê 01 - senha "+str(N_list[0])
-                    msg_udp = "senha "+str(N_list[0])
+                    msg_tcp = "senha "+str(N_list[0])   # Mensagem enviada para o TA
+                    msg_udp = "Guichê 01 - senha "+str(N_list[0]) # Mensagem enviada para o TV
                     res_tcp = (msg_tcp).encode('utf-8')
                     res_udp = (msg_udp).encode('utf-8')
-                    con.send(res_tcp)
+                    
+                    con.send(res_tcp) # Enviando senha para o TA
+                    print(timestamp, "- ",msg_tcp," enviado para o TA")
                     udp.sendto (res_udp, dest)  # Enviando mensagem para server TV
+                    print(timestamp, "- ",msg_tcp," enviado para o TV\n")
+                    
                     N_list.pop(0)
                     count_N_chamadas+=1
                     
@@ -53,12 +59,15 @@ def ClientConnection(con, cliente, udp, dest):
                     con.send(res)
             else:
                 if len(P_list) > 0:
-                    msg_tcp = "Guichê 01 - senha "+str(P_list[0])
-                    msg_udp = "senha "+str(P_list[0])
+                    msg_tcp = "senha "+str(P_list[0])
+                    msg_udp = "Guichê 01 - senha "+str(P_list[0])
                     res_tcp = (msg_tcp).encode('utf-8')
                     res_udp = (msg_udp).encode('utf-8')
+                    
                     con.send(res_tcp)
+                    print(timestamp, "- ",msg_tcp," enviado para o TA")
                     udp.sendto (res_udp, dest)  # Enviando mensagem para server TV
+                    print(timestamp, "- ",msg_tcp," enviado para o TV\n")
                     P_list.pop(0)
                     count_N_chamadas=0
                     

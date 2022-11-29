@@ -12,5 +12,5 @@ while True:
         msg = str("ENTER").encode('utf-8')
         tcp.send (msg)
         response = tcp.recv(1024).decode('utf-8') #Resposta do servidor
-        print(response)
+        print("Atendimento:",response)
     else: print("\n Erro ao enviar a mensagem!")
