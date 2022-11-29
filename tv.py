@@ -1,11 +1,16 @@
 import socket
-HOST = '127.0.0.1'     # Endereco IP do Servidor
-PORT = 5000            # Porta que o Servidor esta
-tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-dest = (HOST, PORT)
-tcp.connect(dest)
-print("Iniciando conexão com servidor... \n")
+HOST = '127.0.0.2'     # Endereco IP do Server TV
+PORT = 5001            # Porta do Server TV
+
+
+udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+orig = (HOST, PORT)
+udp.bind(orig)
+
+print("Monitor de senhas iniciado...\n")
 
 while True:
-    senha = tcp.recv(1024).decode('utf-8')
-    print("Última senha chamada: ",senha)
+    msg, cliente = udp.recvfrom(1024)
+    msg = msg.decode('utf-8')
+    
+    print ("Última senha chamada: ", msg)
